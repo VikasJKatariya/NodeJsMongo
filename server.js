@@ -6,6 +6,18 @@ mongoose.connect('mongodb://localhost:27017/DEMO',{useNewUrlParser: true , useUn
 require("dotenv").config();
 const db = mongoose.connection
 
+const  joi = require('@hapi/joi')
+
+const signUp = joi.object({
+  first_name:joi.string().min(3).required(),
+  last_name:joi.string().min(3).required(),
+  email:joi.string().min(4).required().email(),
+  password:joi.string().min(6).required()
+});
+const login = joi.object({
+  email:joi.string().min(4).required().email(),
+  password:joi.string().min(6).required()
+});
 var bcrypt = require('bcryptjs');
 var jwt = require("jsonwebtoken");
 const auth = require("./middleware/auth");
@@ -37,6 +49,10 @@ app.post("/register", async (req, res) => {
 
     // Our register logic starts here
     try {
+
+      const { error } = signUp.validate(req.body);
+      // Error in response
+      res.send(error.details[0].message);
       // Get user input
       const { first_name, last_name, email, password } = req.body;
   
@@ -87,6 +103,10 @@ app.post("/register", async (req, res) => {
 
     // Our login logic starts here
     try {
+
+      const { error } = login.validate(req.body);
+      // Error in response
+      res.send(error.details[0].message);
       // Get user input
       const { email, password } = req.body;
   
